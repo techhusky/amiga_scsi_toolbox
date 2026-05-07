@@ -5,9 +5,9 @@
 
 CC = vc
 TARGET = +aos68k
-CPU = -cpu=68000
+CPU = -cpu=68030 -fpu=68882
 
-CFLAGS = $(TARGET) $(CPU) -c99
+CFLAGS = $(TARGET) $(CPU) -c99 -I${NDK32}/Include_H
 LDFLAGS = $(TARGET) $(CPU) -lamiga
 
 TOOLBOX_DEPS = toolbox_version.h toolbox_rev.h
