@@ -249,7 +249,7 @@ int main(void)
 				PrintFault(IoErr(),
 					   "\nUnable to write to file");
 				Close(file);
-				file = NULL;
+				file = 0;
 				DeleteFile((const char *)argsarray[ARG_GET]);
 				return RETURN_ERROR;
 			}
