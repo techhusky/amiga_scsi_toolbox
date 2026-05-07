@@ -219,7 +219,7 @@ int main(void)
 		}
 
 		file = Open((const char *)argsarray[ARG_GET], MODE_NEWFILE);
-		if (file == NULL) {
+		if (!file) {
 			PrintFault(IoErr(),
 				   "Unable to open file for writing");
 			return RETURN_ERROR;
