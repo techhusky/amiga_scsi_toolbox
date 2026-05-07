@@ -9,6 +9,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef __VBCC__
+#include <stdlib.h>
+#define __aligned
+static void cleanup(void);
+#endif
+
 #include "toolbox_version.h"
 
 static UBYTE versiontag[] = VERSTAG;
@@ -63,6 +69,10 @@ int main(void)
 {
 	struct SCSICmd scsicmd;
 	int nactions;
+
+#ifdef __VBCC__
+	atexit(cleanup);
+#endif
 
 	if (DOSBase->dl_lib.lib_Version < 36) {
 		Printf("dos.library v36 or later is required\n");
@@ -250,7 +260,11 @@ int main(void)
 	return RETURN_OK;
 }
 
+#ifdef __VBCC__
+static void cleanup(void)
+#else
 void _STD_cleanup(void)
+#endif
 {
 	if (file)
 		Close(file);
