@@ -8,7 +8,7 @@
 
     FORMAT
         DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,LCD=LISTCDS/S,
-	SCD=SETCD/N,GET
+	SCD=SETCD/N,GET,INQ=INQUIRY/S
 
     FUNCTION
 	The DEVICE option specifies which device to open, and UNIT which
@@ -29,6 +29,10 @@
 	The GET option downloads specified file that's being shared from
 	the SCSI emulator. File can include path where the file will be
 	written.
+
+	The INQUIRY option sends a standard SCSI INQUIRY command and
+	displays the device identification, including vendor, product,
+	revision, device type, and ANSI SCSI version.
 
     EXAMPLES
 	1> TOOLBOX LISTDEVICES
@@ -65,5 +69,12 @@
 
 	1> TOOLBOX GET /AmigaTestKit.adf
 	/AmigaTestKit.adf: Block 220/220
+
+	1> TOOLBOX INQUIRY
+	Vendor:   ZULUSCSI
+	Product:  ZULUSCSI
+	Revision: 1.0
+	Type:     Direct access
+	ANSI:     SCSI-2
 
 @ENDNODE MAIN

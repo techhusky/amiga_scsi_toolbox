@@ -29,6 +29,7 @@ enum {
 	ARG_LCD,
 	ARG_SCD,
 	ARG_GET,
+	ARG_INQ,
 	ARG_NARG,
 };
 static LONG argsarray[ARG_NARG];
@@ -64,6 +65,30 @@ static const char * const devicetypes[] = {
 	"ZIP100",
 };
 
+static const char * const periph_devtypes[] = {
+	"Direct access",
+	"Sequential access",
+	"Printer",
+	"Processor",
+	"Write-once",
+	"CD-ROM",
+	"Scanner",
+	"Optical memory",
+	"Medium changer",
+	"Communications",
+};
+
+static const char * const ansi_versions[] = {
+	"Not claimed",
+	"SCSI-1",
+	"SCSI-2",
+	"SPC",
+	"SPC-2",
+	"SPC-3",
+	"SPC-4",
+	"SPC-5",
+};
+
 
 int main(void)
 {
@@ -83,7 +108,8 @@ int main(void)
 	argsarray[ARG_UNIT] = (LONG)&unit;
 
 	args = ReadArgs("DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,"
-			"LCD=LISTCDS/S,SCD=SETCD/N,GET",
+			"LCD=LISTCDS/S,SCD=SETCD/N,GET,"
+			"INQ=INQUIRY/S",
 			argsarray, NULL);
 	if (args == NULL) {
 		PrintFault(IoErr(), "Unable to read arguments");
@@ -94,7 +120,8 @@ int main(void)
 		   (argsarray[ARG_LF] != 0) +
 		   (argsarray[ARG_LCD] != 0) +
 		   (argsarray[ARG_SCD] != 0) +
-		   (argsarray[ARG_GET] != 0);
+		   (argsarray[ARG_GET] != 0) +
+		   (argsarray[ARG_INQ] != 0);
 	if (nactions == 0) {
 		Printf("Must specify an action\n");
 		return RETURN_ERROR;
@@ -154,9 +181,12 @@ int main(void)
 		command[1] = (UBYTE)*(LONG *)argsarray[ARG_SCD] - 1;
 	} else if (argsarray[ARG_GET]) {
 		command[0] = 0xD0;
+	} else if (argsarray[ARG_INQ]) {
+		command[0] = 0x12;
+		command[4] = 36;
 	}
 	scsicmd.scsi_Command = command;
-	scsicmd.scsi_CmdLength = sizeof(command);
+	scsicmd.scsi_CmdLength = argsarray[ARG_INQ] ? 6 : sizeof(command);
 	scsicmd.scsi_Data = (UWORD *)&data;
 	scsicmd.scsi_Length = sizeof(data);
 	scsicmd.scsi_Flags = SCSIF_READ;
@@ -201,6 +231,35 @@ int main(void)
 			}
 			Printf("%-3ld %-32s\n", i, s);
 		}
+	} else if (argsarray[ARG_INQ]) {
+		char vendor[9], product[17], revision[5];
+		UBYTE devtype = data.data[0] & 0x1F;
+		UBYTE rmb = (data.data[1] >> 7) & 1;
+		UBYTE ansi = data.data[2] & 0x07;
+		const char *dtstr, *ansistr;
+
+		memcpy(vendor, &data.data[8], 8);
+		vendor[8] = '\0';
+		memcpy(product, &data.data[16], 16);
+		product[16] = '\0';
+		memcpy(revision, &data.data[32], 4);
+		revision[4] = '\0';
+
+		if (devtype < sizeof(periph_devtypes)/sizeof(periph_devtypes[0]))
+			dtstr = periph_devtypes[devtype];
+		else
+			dtstr = "Unknown";
+
+		if (ansi < sizeof(ansi_versions)/sizeof(ansi_versions[0]))
+			ansistr = ansi_versions[ansi];
+		else
+			ansistr = "Unknown";
+
+		Printf("Vendor:   %s\n", vendor);
+		Printf("Product:  %s\n", product);
+		Printf("Revision: %s\n", revision);
+		Printf("Type:     %s%s\n", dtstr, rmb ? " (removable)" : "");
+		Printf("ANSI:     %s\n", ansistr);
 	} else if (argsarray[ARG_GET]) {
 		ULONG i, nfiles;
 		ULONG nblocks;
