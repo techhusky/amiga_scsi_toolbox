@@ -8,7 +8,7 @@
 
     FORMAT
         DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,LCD=LISTCDS/S,
-	SCD=SETCD/N,GET,INQ=INQUIRY/S
+	SCD=SETCD/N,GET,INQ=INQUIRY/S,TR=TESTREADY/S
 
     FUNCTION
 	The DEVICE option specifies which device to open, and UNIT which
@@ -33,6 +33,9 @@
 	The INQUIRY option sends a standard SCSI INQUIRY command and
 	displays the device identification, including vendor, product,
 	revision, device type, and ANSI SCSI version.
+
+	The TESTREADY option sends a SCSI TEST UNIT READY command to
+	check whether the specified device and unit is ready.
 
     EXAMPLES
 	1> TOOLBOX LISTDEVICES
@@ -76,5 +79,8 @@
 	Revision: 1.0
 	Type:     Direct access
 	ANSI:     SCSI-2
+
+	1> TOOLBOX TESTREADY
+	Device scsi.device unit 2 is ready
 
 @ENDNODE MAIN
