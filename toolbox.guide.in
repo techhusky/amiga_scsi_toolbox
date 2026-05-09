@@ -8,7 +8,7 @@
 
     FORMAT
         DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,LCD=LISTCDS/S,
-	SCD=SETCD/N,GET,INQ=INQUIRY/S
+	SCD=SETCD/N,GET,INQ=INQUIRY/S,TR=TESTREADY/S
 
     FUNCTION
 	The DEVICE option specifies which device to open, and UNIT which
@@ -34,31 +34,34 @@
 	displays the device identification, including vendor, product,
 	revision, device type, and ANSI SCSI version.
 
+	The TESTREADY option sends a SCSI TEST UNIT READY command to
+	check whether the specified device and unit is ready.
+
     EXAMPLES
 	1> TOOLBOX LISTDEVICES
-	ID  Type                            
+	ID  Type
 	------------------------------------
-	0   Not enabled                     
-	1   Fixed                           
-	2   Optical                         
-	3   Not enabled                     
-	4   Fixed                           
-	5   Fixed                           
-	6   Not enabled                     
-	7   Not enabled                     
+	0   Not enabled
+	1   Fixed
+	2   Optical
+	3   Not enabled
+	4   Fixed
+	5   Fixed
+	6   Not enabled
+	7   Not enabled
 
 	1> TOOLBOX DEVICE scsi.device UNIT 2 LF
-	Name                             Size      
+	Name                             Size
 	-------------------------------------------
-	AmigaTestKit.adf                 901120    
-	SysInfo.adf                      901120    
+	AmigaTestKit.adf                 901120
+	SysInfo.adf                      901120
 
 	1> TOOLBOX LCD
-	Index  Name                             Size      
+	Index  Name                             Size
 	--------------------------------------------------
-	1      CygnusEd_Pro_5.iso               37969920  
-	2      RoadshowCD.iso                   31037440  
-	3      AmigaOS3.2CD.iso                 77899776  
+	1      CygnusEd_Pro_5.iso               37969920
+	2      RoadshowCD.iso                   31037440
+	3      AmigaOS3.2CD.iso                 77899776
 
 	1> TOOLBOX SETCD 2
 
@@ -76,5 +79,8 @@
 	Revision: 1.0
 	Type:     Direct access
 	ANSI:     SCSI-2
+
+	1> TOOLBOX TESTREADY
+	Device scsi.device unit 0 is ready
 
 @ENDNODE MAIN

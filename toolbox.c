@@ -30,6 +30,7 @@ enum {
 	ARG_SCD,
 	ARG_GET,
 	ARG_INQ,
+	ARG_TR,
 	ARG_NARG,
 };
 static LONG argsarray[ARG_NARG];
@@ -109,7 +110,7 @@ int main(void)
 
 	args = ReadArgs("DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,"
 			"LCD=LISTCDS/S,SCD=SETCD/N,GET,"
-			"INQ=INQUIRY/S",
+			"INQ=INQUIRY/S,TR=TESTREADY/S",
 			argsarray, NULL);
 	if (args == NULL) {
 		PrintFault(IoErr(), "Unable to read arguments");
@@ -121,7 +122,8 @@ int main(void)
 		   (argsarray[ARG_LCD] != 0) +
 		   (argsarray[ARG_SCD] != 0) +
 		   (argsarray[ARG_GET] != 0) +
-		   (argsarray[ARG_INQ] != 0);
+		   (argsarray[ARG_INQ] != 0) +
+		   (argsarray[ARG_TR] != 0);
 	if (nactions == 0) {
 		Printf("Must specify an action\n");
 		return RETURN_ERROR;
@@ -184,12 +186,25 @@ int main(void)
 	} else if (argsarray[ARG_INQ]) {
 		command[0] = 0x12;
 		command[4] = 36;
+	} else if (argsarray[ARG_TR]) {
+		command[0] = 0x00;
 	}
 	scsicmd.scsi_Command = command;
-	scsicmd.scsi_CmdLength = argsarray[ARG_INQ] ? 6 : sizeof(command);
+	scsicmd.scsi_CmdLength =
+		(argsarray[ARG_INQ] || argsarray[ARG_TR]) ? 6 : sizeof(command);
 	scsicmd.scsi_Data = (UWORD *)&data;
-	scsicmd.scsi_Length = sizeof(data);
+	scsicmd.scsi_Length = argsarray[ARG_TR] ? 0 : sizeof(data);
 	scsicmd.scsi_Flags = SCSIF_READ;
+
+	if (argsarray[ARG_TR]) {
+		if (DoIO((struct IORequest *)ior))
+			Printf("Device %s unit %ld is not ready\n",
+			       device, unit);
+		else
+			Printf("Device %s unit %ld is ready\n",
+			       device, unit);
+		return RETURN_OK;
+	}
 
 	if (DoIO((struct IORequest *)ior)) {
 		Printf("Unable to send IO request: %ld\n", ior->io_Error);
